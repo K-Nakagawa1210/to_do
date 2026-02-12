@@ -157,6 +157,7 @@ GEM
     nio4r (2.7.5)
     nokogiri (1.19.0-x86_64-linux-gnu)
       racc (~> 1.4)
+    pg (1.6.3-x86_64-linux)
     pp (0.6.3)
       prettyprint
     prettyprint (0.2.0)
@@ -267,6 +268,7 @@ DEPENDENCIES
   importmap-rails
   jbuilder
   mysql2 (~> 0.5)
+  pg
   puma (>= 5.0)
   rails (~> 7.1.0)
   selenium-webdriver
