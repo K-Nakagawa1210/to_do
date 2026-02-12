@@ -6,7 +6,7 @@ tasks = [
   { name: "手と顔を洗う", sequence: 2 },
   { name: "着替える", sequence: 3 },
   { name: "水筒を入れる", sequence: 4 },
-  { name: "学校の準備の最終確認", sequence: 5 },
+  { name: "宿題のやり直しをする", sequence: 5 },
   { name: "宿題・連絡ファイルを入れる", sequence: 6 },
   { name: "ごはんを食べる", sequence: 7 },
   { name: "歯をみがく", sequence: 8 }

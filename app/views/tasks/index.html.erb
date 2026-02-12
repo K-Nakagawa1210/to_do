@@ -1,10 +1,14 @@
 <div style="text-align: center; font-size: 2rem; margin-top: 50px;">
+<% colors = ["#BB86FC", "#03DAC6", "#CF6679", "#FFB74D", "#4FC3F7", "#AED581", "#F06292", "#BA68C8"] %>
+<% current_color = colors[(@current_task&.sequence.to_i - 1) % colors.length] %>
+
+<div style="text-align: center; margin-top: 30px;" class="fade-in">
   
   <% if @all_done %>
-    <h1 style="font-size: 4rem; color: #e91e63;">おめでとう！</h1>
+    <h1 style="font-size: 4rem; color: #ff4081;">おめでとう！</h1>
     <p style="font-size: 1.5rem;">全部 できたね！</p>
     
-    <div id="quiz-section" style="background: #e3f2fd; padding: 30px; border-radius: 20px; border: 4px solid #2196F3; margin-top: 20px;">
+    <div id="quiz-section" style="background: #1e1e1e; padding: 30px; border-radius: 20px; border: 4px solid #bb86fc; margin: 20px;">
       <p style="font-size: 1.5rem; font-weight: bold;">【時間 クイズ】</p>
       
       <% if @minutes_left > 0 %>
@@ -64,31 +68,27 @@
 
   <% elsif @current_task %>
     <% if @current_task.sequence == 0 %>
-      <%# --- おはよう画面（青基調デザイン） --- %>
-      <div style="background-color: #e3f2fd; padding: 40px; border-radius: 30px; border: 5px solid #2196f3; box-shadow: 0 10px 20px rgba(0,0,0,0.1);">
-        <p style="font-size: 1.5rem; color: #1565c0; margin-bottom: 10px; font-weight: bold;"></p>
-        <h1 style="font-size: 3.5rem; color: #0d47a1; margin-bottom: 35px; line-height: 1.2;">
-          <%= @current_task.name %>
-        </h1>
-        
-        <%= button_to complete_task_path(@current_task), 
-            method: :post, 
-            style: "width: 90%; padding: 35px; font-size: 2.8rem; background: linear-gradient(145deg, #2196f3, #1976d2); color: white; border-radius: 50px; border: none; box-shadow: 0 8px #0d47a1; cursor: pointer; font-weight: bold; transition: 0.2s;" do %>
-          ☀️ スタート！
-        <% end %>
-        
-        <p style="margin-top: 25px; font-size: 1.3rem; color: #546e7a;">
-        </p>
-      </div>
+      <%# --- おはよう画面 --- %>
+        <div style="background-color: #1a237e; padding: 40px; border-radius: 30px; border: 5px solid #3f51b5;">
+          <h1 style="font-size: 3.5rem; color: #ffffff;"><%= @current_task.name %></h1>
+          <%= button_to '☀️ スタート', complete_task_path(@current_task), method: :post, 
+              style: "width: 90%; padding: 40px; font-size: 3rem; background: #3f51b5; color: white; border-radius: 50px; border: none; box-shadow: 0 8px #1a237e;" %>
+        </div>
 
     <% else %>
-      <%# --- 通常のタスク画面 --- %>
-      <p style="color: #666; font-size: 1.2rem;">今 すること（<%= @current_task.sequence %>/8）</p>
-      <h1 style="font-size: 4rem; color: #ff6600; margin-bottom: 40px;"><%= @current_task.name %></h1>
+      <%# --- 通常タスク（色が変わる！） --- %>
+      <p style="color: #aaa; font-size: 1.5rem;">今 すること（<%= @current_task.sequence %>/8）</p>
       
-      <%= button_to 'できた！', complete_task_path(@current_task), 
-          method: :post, 
-          style: "width: 85%; padding: 40px; font-size: 3rem; background-color: #4CAF50; color: white; border-radius: 30px; border: none; box-shadow: 0 8px #2e7d32; cursor: pointer;" %>
+      <%# タスク名を大きな枠で囲み、色を目立たせる %>
+      <div style="margin: 20px; padding: 30px; border-radius: 20px; border: 8px solid <%= current_color %>;">
+        <h1 style="font-size: 4.5rem; color: <%= current_color %>; margin: 0;">
+          <%= @current_task.name %>
+        </h1>
+      </div>
+      
+      <%= button_to 'できた！', complete_task_path(@current_task), method: :post, 
+          onclick: "this.style.opacity='0.5'; document.body.style.backgroundColor='#ffffff';", 
+          style: "width: 85%; padding: 45px; font-size: 3.5rem; background-color: #03dac6; color: #000; border-radius: 30px; border: none; font-weight: bold; box-shadow: 0 10px #018786;" %>
     <% end %>
   <% end %>
 

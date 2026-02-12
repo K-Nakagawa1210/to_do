@@ -1,20 +1,44 @@
+<%# app/views/layouts/application.html.erb %>
 <!DOCTYPE html>
 <html>
   <head>
-    <title>ToDoApp</title>
+    <title>竜馬くんのあさアプリ</title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
     <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+    
+    <style>
+      /* ダークモードの基本設定 */
+      body {
+        background-color: #121212; /* 真っ黒すぎない高級感のある黒 */
+        color: #e0e0e0;
+        margin: 0;
+        transition: background-color 0.3s;
+      }
+
+      /* 画面が切り替わった時のフェードイン演出 */
+      .fade-in {
+        animation: fadeIn 0.5s ease-in-out;
+      }
+
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+
+      /* ナビゲーションもダークに */
+      nav {
+        background-color: #1f1f1f !important;
+        border-bottom: 1px solid #333;
+      }
+    </style>
   </head>
 
-  <body style="margin: 0; padding-bottom: 100px; font-family: sans-serif;">
-    <nav style="background-color: #333; padding: 15px; text-align: center; display: flex; justify-content: space-around; position: sticky; top: 0; z-index: 1000;">
-      <%= link_to '🏠 トップ', root_path, 
-          style: "color: white; text-decoration: none; font-weight: bold; font-size: 1.2rem; background: #555; padding: 10px 20px; border-radius: 10px;" %>
-      
-      <%= link_to '📊 記録', history_tasks_path, 
-          style: "color: white; text-decoration: none; font-weight: bold; font-size: 1.2rem; background: #555; padding: 10px 20px; border-radius: 10px;" %>
+  <body class="fade-in">
+    <nav style="padding: 15px; text-align: center; display: flex; justify-content: space-around; position: sticky; top: 0; z-index: 1000;">
+      <%= link_to '🏠 トップ', root_path, style: "color: #bb86fc; text-decoration: none; font-weight: bold; background: #333; padding: 10px 20px; border-radius: 10px;" %>
+      <%= link_to '📊 記録', history_tasks_path, style: "color: #03dac6; text-decoration: none; font-weight: bold; background: #333; padding: 10px 20px; border-radius: 10px;" %>
     </nav>
     <%= yield %>
   </body>
