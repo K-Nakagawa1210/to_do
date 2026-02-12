@@ -1,0 +1,15 @@
+<div style="padding: 20px; text-align: center;">
+  <h2>時間を 直す</h2>
+  <p><%= @task_log.task.name %></p>
+
+  <%= form_with model: @task_log do |f| %>
+    <div style="margin-bottom: 20px;">
+      <%= f.datetime_select :completed_at, {}, { style: "font-size: 1.2rem; padding: 5px;" } %>
+    </div>
+    
+    <%= f.submit "保存する", style: "background: #4CAF50; color: white; padding: 10px 30px; border-radius: 5px; border: none; font-size: 1.2rem;" %>
+  <% end %>
+
+  <br><br>
+  <%= link_to 'もどる', history_tasks_path %>
+</div>

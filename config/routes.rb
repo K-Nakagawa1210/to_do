@@ -1,8 +1,6 @@
 Rails.application.routes.draw do
-  # アプリを開いた時に一番最初に表示するページ
   root "tasks#index"
 
-  # 「できた！」ボタンを押した時の設定
   resources :tasks, only: [] do
     member do
       post :complete
@@ -12,6 +10,9 @@ Rails.application.routes.draw do
     end
   end
 
-  # (オプション) もし過去の記録を見たい場合はここを後で使います
-  # get "history", to: "tasks#history"
+  resources :task_logs, only: [:edit, :update] do
+    member do
+      get :delete_log  # GETで削除アクションへ行くルートを追加
+    end
+  end
 end

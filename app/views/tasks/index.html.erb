@@ -1,25 +1,95 @@
 <div style="text-align: center; font-size: 2rem; margin-top: 50px;">
-  <% if @current_task %>
-    <p>いま すること</p>
-    <h1 style="font-size: 4rem; color: #ff6600;"><%= @current_task.name %></h1>
-    
-    <%= button_to 'できた！', complete_task_path(@current_task), 
-        method: :post, 
-        style: "width: 80%; padding: 30px; font-size: 2rem; background-color: #4CAF50; color: white; border-radius: 20px; border: none;" %>
   
-  <% else %>
+  <% if @all_done %>
     <h1 style="font-size: 4rem; color: #e91e63;">おめでとう！</h1>
-    <p>ぜんぶ できたね！</p>
+    <p style="font-size: 1.5rem;">全部 できたね！</p>
     
-    <div style="background: #f0f0f0; padding: 20px; border-radius: 15px; margin-top: 20px;">
-      <p>【しゅっぱつ クイズ】</p>
-      <p>いえを 出る 7:20 まで あと・・・</p>
-      <p style="font-size: 3rem;"><%= @minutes_left > 0 ? "#{@minutes_left} ふん" : "じかんだよ！" %></p>
-      <p>正解できるかな？</p>
-    </div>
-  <% end %>
-</div>
+    <div id="quiz-section" style="background: #e3f2fd; padding: 30px; border-radius: 20px; border: 4px solid #2196F3; margin-top: 20px;">
+      <p style="font-size: 1.5rem; font-weight: bold;">【時間 クイズ】</p>
+      
+      <% if @minutes_left > 0 %>
+        <%# --- 7:20より前のとき：クイズを表示 --- %>
+        <p style="font-size: 1.2rem;">家を 出る 7:20 まで</p>
+        <p style="font-size: 1.8rem; color: #d32f2f; font-weight: bold;">あと 何分 かな？</p>
 
-<div style="margin-top: 100px;">
-  <%= link_to 'きろくをみる', history_tasks_path, style: "color: #999; text-decoration: none; font-size: 1rem;" %>
+        <input type="number" id="user-answer" placeholder="??" 
+               style="width: 150px; font-size: 3rem; text-align: center; border-radius: 10px; border: 2px solid #ccc; padding: 10px;">
+        <span style="font-size: 2rem;"> 分</span>
+
+        <br><br>
+
+        <button type="button" onclick="checkAnswer()" 
+                style="width: 80%; padding: 20px; font-size: 1.5rem; background-color: #2196F3; color: white; border-radius: 15px; border: none; cursor: pointer;">
+          答え合わせ！
+        </button>
+
+      <% else %>
+        <%# --- 7:20を過ぎたとき：警告メッセージを表示 --- %>
+        <div style="background-color: #ffcdd2; padding: 20px; border-radius: 15px; border: 3px solid #f44336;">
+          <p style="font-size: 2rem; color: #d32f2f; font-weight: bold; margin: 0;">
+            7:20を 過ぎています！<br>
+            急いで 出発 しましょう！
+          </p>
+        </div>
+      <% end %>
+
+      <div id="result-message" style="margin-top: 20px; font-size: 3rem; font-weight: bold; min-height: 1.2em;"></div>
+    </div>
+
+    <script>
+      window.checkAnswer = function() {
+        const correctAnswer = <%= @minutes_left.to_i %>;
+        const inputElement = document.getElementById('user-answer');
+        const messageDiv = document.getElementById('result-message');
+        
+        if (!inputElement || !messageDiv) return;
+
+        const userAnswer = inputElement.value;
+
+        if (userAnswer === "") {
+          messageDiv.innerText = "数字を いれてね";
+          messageDiv.style.color = "#999";
+          return;
+        }
+
+        if (parseInt(userAnswer) === correctAnswer) {
+          messageDiv.innerText = "✨ 正解！！ ✨";
+          messageDiv.style.color = "#ff9800";
+        } else {
+          messageDiv.innerText = "残念！ もう一度 考えてみよう";
+          messageDiv.style.color = "#666";
+        }
+      };
+    </script>
+
+  <% elsif @current_task %>
+    <% if @current_task.sequence == 0 %>
+      <%# --- おはよう画面（青基調デザイン） --- %>
+      <div style="background-color: #e3f2fd; padding: 40px; border-radius: 30px; border: 5px solid #2196f3; box-shadow: 0 10px 20px rgba(0,0,0,0.1);">
+        <p style="font-size: 1.5rem; color: #1565c0; margin-bottom: 10px; font-weight: bold;"></p>
+        <h1 style="font-size: 3.5rem; color: #0d47a1; margin-bottom: 35px; line-height: 1.2;">
+          <%= @current_task.name %>
+        </h1>
+        
+        <%= button_to complete_task_path(@current_task), 
+            method: :post, 
+            style: "width: 90%; padding: 35px; font-size: 2.8rem; background: linear-gradient(145deg, #2196f3, #1976d2); color: white; border-radius: 50px; border: none; box-shadow: 0 8px #0d47a1; cursor: pointer; font-weight: bold; transition: 0.2s;" do %>
+          ☀️ スタート！
+        <% end %>
+        
+        <p style="margin-top: 25px; font-size: 1.3rem; color: #546e7a;">
+        </p>
+      </div>
+
+    <% else %>
+      <%# --- 通常のタスク画面 --- %>
+      <p style="color: #666; font-size: 1.2rem;">今 すること（<%= @current_task.sequence %>/8）</p>
+      <h1 style="font-size: 4rem; color: #ff6600; margin-bottom: 40px;"><%= @current_task.name %></h1>
+      
+      <%= button_to 'できた！', complete_task_path(@current_task), 
+          method: :post, 
+          style: "width: 85%; padding: 40px; font-size: 3rem; background-color: #4CAF50; color: white; border-radius: 30px; border: none; box-shadow: 0 8px #2e7d32; cursor: pointer;" %>
+    <% end %>
+  <% end %>
+
 </div>
