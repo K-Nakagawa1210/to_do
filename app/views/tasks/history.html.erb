@@ -1,0 +1,26 @@
+<div style="padding: 20px; font-family: sans-serif;">
+  <h1>あさの きろく（1しゅうかん）</h1>
+  
+  <%= link_to '← もどる', root_path, style: "text-decoration: none; color: #2196F3; font-weight: bold;" %>
+
+  <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+    <thead>
+      <tr style="background-color: #f2f2f2;">
+        <th style="border: 1px solid #ddd; padding: 10px;">ひにち</th>
+        <th style="border: 1px solid #ddd; padding: 10px;">すること</th>
+        <th style="border: 1px solid #ddd; padding: 10px;">おわった じかん</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @logs.each do |log| %>
+        <tr>
+          <td style="border: 1px solid #ddd; padding: 10px;"><%= log.completed_at.strftime("%m/%d(%a)") %></td>
+          <td style="border: 1px solid #ddd; padding: 10px;"><%= log.task.name %></td>
+          <td style="border: 1px solid #ddd; padding: 10px; font-weight: bold;">
+            <%= log.completed_at.strftime("%H:%M") %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>
