@@ -1,8 +1,21 @@
-tasks = ["薬を飲む", "手と顔を洗う", "着替える", "水筒を入れる", 
-         "連絡ノートを見直し、今日の学校の確認", "宿題・ファイルをしまう", "ご飯を食べる", "歯磨きをする"]
+# db/seeds.rb
 
-Task.create!(name: "竜馬くん、おはよう", sequence: 0)
+tasks = [
+  { name: "竜馬くん、おはよう", sequence: 0 },
+  { name: "薬を飲む", sequence: 1 },
+  { name: "手と顔を洗う", sequence: 2 },
+  { name: "着替える", sequence: 3 },
+  { name: "水筒を入れる", sequence: 4 },
+  { name: "学校の準備の最終確認", sequence: 5 },
+  { name: "宿題・連絡ファイルを入れる", sequence: 6 },
+  { name: "ごはんを食べる", sequence: 7 },
+  { name: "歯をみがく", sequence: 8 }
+]
 
-tasks.each_with_index do |name, index|
-  Task.find_or_create_by!(name: name, sequence: index + 1)
+tasks.each do |task_data|
+  Task.find_or_create_by!(sequence: task_data[:sequence]) do |t|
+    t.name = task_data[:name]
+  end
 end
+
+puts "Tasks have been seeded!"

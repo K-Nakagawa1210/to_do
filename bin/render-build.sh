@@ -3,6 +3,11 @@
 set -o errexit
 
 bundle install
-bundle exec rake assets:precompile
-bundle exec rake assets:clean
-bundle exec rake db:migrate
+bundle exec rails assets:precompile
+bundle exec rails assets:clean
+
+# データベースの作成とマイグレーション
+bundle exec rails db:migrate
+
+# ここに Seed を追加！これによってデプロイ時にデータが投入されます
+bundle exec rails db:seed
