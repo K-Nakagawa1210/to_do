@@ -1,13 +1,13 @@
-<div style="padding: 10px; font-family: sans-serif;">
-  <h1 style="font-size: 1.5rem; text-align: center;"><%= Date.today.month %>月の 記録</h1>
+<div style="padding: 10px; font-family: sans-serif; background-color: #121212; color: #e0e0e0; min-height: 100vh;">
+  <h1 style="font-size: 1.5rem; text-align: center; color: #bb86fc;"><%= Date.today.month %>月の 記録</h1>
 
-  <div style="overflow-x: auto; -webkit-overflow-scrolling: touch; max-height: 80vh; border: 1px solid #ccc;">
-    <table style="width: 100%; border-collapse: collapse; min-width: 850px; background: white;">
+  <div style="overflow-x: auto; -webkit-overflow-scrolling: touch; max-height: 80vh; border: 1px solid #444;">
+    <table style="width: 100%; border-collapse: collapse; min-width: 850px; background: #1e1e1e;">
       <thead>
-        <tr style="background-color: #f2f2f2; position: sticky; top: 0; z-index: 20;">
-          <th style="border: 1px solid #ccc; padding: 10px; position: sticky; left: 0; background: #f2f2f2; z-index: 30;">日にち</th>
+        <tr style="background-color: #333; position: sticky; top: 0; z-index: 20;">
+          <th style="border: 1px solid #444; padding: 10px; position: sticky; left: 0; background: #333; color: #fff; z-index: 30;">日にち</th>
           <% @tasks.each do |task| %>
-            <th style="border: 1px solid #ccc; padding: 10px; font-size: 0.8rem; min-width: 90px;">
+            <th style="border: 1px solid #444; padding: 10px; font-size: 0.8rem; min-width: 90px; color: #fff;">
               <%= task.name %>
             </th>
           <% end %>
@@ -15,22 +15,22 @@
       </thead>
       <tbody>
         <% @dates.each do |date| %>
-          <tr>
-            <td style="border: 1px solid #ccc; padding: 10px; font-weight: bold; position: sticky; left: 0; background: white; white-space: nowrap; z-index: 10;">
+          <tr style="border-bottom: 1px solid #333;">
+            <td style="border: 1px solid #444; padding: 10px; font-weight: bold; position: sticky; left: 0; background: #1e1e1e; color: #bb86fc; white-space: nowrap; z-index: 10;">
               <%= date.strftime("%m/%d(#{%w(日 月 火 水 木 金 土)[date.wday]})") %>
             </td>
             <% @tasks.each do |task| %>
               <% time = @logs_map[[date, task.id]] %>
-              <td style="border: 1px solid #ccc; padding: 10px; text-align: center; <%= 'background: #e8f5e9;' if time %>">
+              <td style="border: 1px solid #444; padding: 10px; text-align: center; <%= time ? 'background: #004d40;' : '' %>">
                 <% if time %>
                   <% log = TaskLog.find_by(completed_at: date.beginning_of_day..date.end_of_day, task_id: task.id) %>
-                  <span style="font-size: 0.9rem; font-weight: bold; color: #2e7d32;"><%= time %></span><br>
-                  <div style="font-size: 0.7rem; margin-top: 5px;">
-                    <%= link_to '直す', edit_task_log_path(log), style: "color: #2196F3;" %> | 
-                    <%= link_to '消す', delete_log_task_log_path(log), data: { confirm: '消しても いいですか？' }, style: "color: #f44336;" %>
+                  <span style="font-size: 1rem; font-weight: bold; color: #03dac6;"><%= time %></span><br>
+                  <div style="font-size: 0.75rem; margin-top: 5px;">
+                    <%= link_to '修正', edit_task_log_path(log), style: "color: #03a9f4;" %> | 
+                    <%= link_to '消去', delete_log_task_log_path(log), data: { confirm: '消去しても いいですか？' }, style: "color: #cf6679;" %>
                   </div>
                 <% else %>
-                  <span style="color: #ccc;">-</span>
+                  <span style="color: #444;">-</span>
                 <% end %>
               </td>
             <% end %>
@@ -39,6 +39,4 @@
       </tbody>
     </table>
   </div>
-  
-  <p style="font-size: 0.8rem; color: #666; margin-top: 10px;">※ 1日から 今日までの 記録です</p>
 </div>
