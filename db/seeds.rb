@@ -1,6 +1,9 @@
 # db/seeds.rb
 
-# 1. 一度既存のタスクを全て削除してリセット（確実な反映のため）
+# 1. 記録(TaskLog)を先に全て消す（タスクを消せるようにするため）
+TaskLog.destroy_all
+
+# 2. タスクを全て消す
 Task.destroy_all
 
 tasks = [
@@ -19,4 +22,4 @@ tasks.each do |task_data|
   Task.create!(task_data)
 end
 
-puts "Tasks have been re-seeded and updated!"
+puts "Success: All data reset and new tasks created!"
