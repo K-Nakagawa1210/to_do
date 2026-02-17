@@ -13,24 +13,29 @@
       <p style="font-size: 1.5rem; font-weight: bold;">【時間 クイズ】</p>
       
       <% if @minutes_left > 0 %>
-        <%# --- 7:20より前のとき：クイズを表示 --- %>
-        <p style="font-size: 1.2rem;">家を 出発する 7:20 まで</p>
-        <%# 赤字(#d32f2f)をオレンジ系(#ff9800)に変更して優しく %>
-        <p style="font-size: 1.8rem; color: #ff9800; font-weight: bold;">あと 何分 かな？</p>
+        <p style="font-size: 1.5rem; color: #fff;">
+          <span style="color: #4FC3F7;"><%= @start_time_display %></span> から 
+          <span style="color: #ffca28;"><%= @end_time_display %></span> までは
+        </p>
+        <p style="font-size: 1.8rem; color: #ff9800; font-weight: bold;">何時間 何分 かな？</p>
 
-        <input type="number" id="user-answer" placeholder="??" 
-               style="width: 150px; font-size: 3rem; text-align: center; border-radius: 10px; border: 2px solid #ccc; padding: 10px; background: #fff; color: #000;">
-        <span style="font-size: 2rem; color: #fff;"> 分</span>
+        <div style="display: flex; justify-content: center; align-items: center; gap: 10px;">
+          <input type="number" id="user-hour" placeholder="0" 
+                style="width: 100px; font-size: 3rem; text-align: center; border-radius: 10px; border: 2px solid #ccc; padding: 10px;">
+          <span style="font-size: 1.5rem; color: #fff;">時間</span>
+          
+          <input type="number" id="user-min" placeholder="00" 
+                style="width: 120px; font-size: 3rem; text-align: center; border-radius: 10px; border: 2px solid #ccc; padding: 10px;">
+          <span style="font-size: 1.5rem; color: #fff;">分</span>
+        </div>
 
-        <br><br>
-
+        <br>
         <button type="button" onclick="checkAnswer()" 
                 style="width: 80%; padding: 20px; font-size: 1.5rem; background-color: #2196F3; color: white; border-radius: 15px; border: none; cursor: pointer;">
           答え合わせ！
         </button>
 
       <% else %>
-        <%# --- 7:20を過ぎたとき：赤背景と赤字を廃止し、黄色と黒の注意喚起に変更 --- %>
         <div style="background-color: #fff9c4; padding: 20px; border-radius: 15px; border: 5px solid #fbc02d;">
           <p style="font-size: 2rem; color: #000; font-weight: bold; margin: 0;">
             7:20を 過ぎています！<br>
@@ -44,34 +49,32 @@
 
     <script>
       window.checkAnswer = function() {
-        const correctAnswer = <%= @minutes_left.to_i %>;
-        const inputElement = document.getElementById('user-answer');
+        const correctTotalMin = <%= @correct_total_minutes %>;
+        const hInput = document.getElementById('user-hour').value || 0;
+        const mInput = document.getElementById('user-min').value || 0;
         const messageDiv = document.getElementById('result-message');
-        
-        if (!inputElement || !messageDiv) return;
 
-        const userAnswer = parseInt(inputElement.value);
+        // 入力された値をすべて「分」に換算
+        const userTotalMin = parseInt(hInput) * 60 + parseInt(mInput);
 
-        if (isNaN(userAnswer)) {
-          messageDiv.innerText = "数字を 入力してね";
+        if (isNaN(userTotalMin)) {
+          messageDiv.innerText = "数字を入力してね";
           messageDiv.style.color = "#aaa";
           return;
         }
 
-        // --- ★ ±2分を正解にするロジック ---
-        // Math.abs(a - b) で差の絶対値（ズレ）を計算します
-        const diff = Math.abs(userAnswer - correctAnswer);
+        // ズレを計算（±2分までOK）
+        const diff = Math.abs(userTotalMin - correctTotalMin);
 
         if (diff <= 2) {
           messageDiv.innerText = "✨ 正解！！ ✨";
-          messageDiv.style.color = "#ffca28"; // ゴールデンイエロー
+          messageDiv.style.color = "#ffca28";
         } else {
           messageDiv.innerText = "残念！ もう一度 考えてみよう";
           messageDiv.style.color = "#888";
         }
       };
     </script>
-
   <% elsif @current_task %>
     <% if @current_task.sequence == 0 %>
       <%# --- おはよう画面 --- %>

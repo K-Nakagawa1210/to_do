@@ -1,32 +1,36 @@
 class TasksController < ApplicationController
   def index
-    # 日本時間の「今日」を基準にする
     jst_now = Time.current.in_time_zone('Tokyo')
-    
-    # 1. 今日の完了済みタスクIDを取得
     completed_task_ids = TaskLog.where(completed_at: jst_now.all_day).pluck(:task_id)
-    
-    # 2. まだ終わっていない最初のタスクを取得
     @current_task = Task.where.not(id: completed_task_ids).order(:sequence).first
 
-    # 3. クイズ用の時間計算
-    departure_time = jst_now.change(hour: 7, min: 20, sec: 0)
-    @minutes_left = ((departure_time - jst_now) / 60).to_i
-
-    # 4. 全タスク完了判定（おはよう=0 を除く 1〜8 が終わっているか）
-    main_tasks = Task.where("sequence > ?", 0)
-    main_tasks_count = main_tasks.count
+    # --- クイズの生成（ランダムな時間の計算） ---
+    # その日の日付をシードにして、リロードしてもその日は同じ問題が出るようにする
+    random_gen = Random.new(jst_now.to_date.to_time.to_i)
     
+    # 開始時間を 6:00〜6:30 の間で 5分刻みで生成
+    start_h = 6
+    start_m = [0, 5, 10, 15, 20, 25, 30].sample(random: random_gen)
+    @start_time_display = "#{start_h}:#{start_m.to_s.rjust(2, '0')}"
+
+    # 終了時間を 7:00〜7:30 の間で 5分刻みで生成
+    end_h = 7
+    end_m = [0, 5, 10, 15, 20, 25, 30].sample(random: random_gen)
+    @end_time_display = "#{end_h}:#{end_m.to_s.rjust(2, '0')}"
+
+    # 正解の合計分を計算（例：6:10〜7:20 なら 70分）
+    @correct_total_minutes = (end_h * 60 + end_m) - (start_h * 60 + start_m)
+    
+    # 出発時刻（警告用）はこれまで通り 7:20
+    departure_limit = jst_now.change(hour: 7, min: 20, sec: 0)
+    @minutes_left = ((departure_limit - jst_now) / 60).to_i
+    # ------------------------------------------
+
+    main_tasks_count = Task.where("sequence > ?", 0).count
     completed_main_tasks_count = TaskLog.joins(:task)
                                         .where(completed_at: jst_now.all_day)
                                         .where("tasks.sequence > ?", 0).count
-
-    # 「次のタスクがない」かつ「メインタスクが全て完了している」ならおめでとう画面
-    if @current_task.nil? && completed_main_tasks_count >= main_tasks_count
-      @all_done = true
-    else
-      @all_done = false
-    end
+    @all_done = (@current_task.nil? && completed_main_tasks_count >= main_tasks_count)
   end
 
   def complete

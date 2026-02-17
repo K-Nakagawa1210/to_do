@@ -1,5 +1,8 @@
 # db/seeds.rb
 
+# 1. 一度既存のタスクを全て削除してリセット（確実な反映のため）
+Task.destroy_all
+
 tasks = [
   { name: "竜馬くん、おはよう", sequence: 0 },
   { name: "薬を飲む", sequence: 1 },
@@ -13,9 +16,7 @@ tasks = [
 ]
 
 tasks.each do |task_data|
-  Task.find_or_create_by!(sequence: task_data[:sequence]) do |t|
-    t.name = task_data[:name]
-  end
+  Task.create!(task_data)
 end
 
-puts "Tasks have been seeded!"
+puts "Tasks have been re-seeded and updated!"
