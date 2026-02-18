@@ -7,6 +7,8 @@ Rails.application.routes.draw do
     end
     collection do
       get :history
+      patch :update_score
+      post :add_points
     end
   end
 

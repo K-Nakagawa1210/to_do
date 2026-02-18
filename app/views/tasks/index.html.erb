@@ -1,18 +1,27 @@
-<div style="text-align: center; font-size: 2rem; margin-top: 50px;">
-<%# sequence番号に合わせて色を切り替え。CF6679(赤系)を除外して調整 %>
-<% colors = ["#BB86FC", "#03DAC6", "#FFB74D", "#4FC3F7", "#AED581", "#F06292", "#BA68C8", "#81D4FA"] %>
-<% current_color = colors[(@current_task&.sequence.to_i - 1) % colors.length] %>
-
-<div style="text-align: center; margin-top: 30px;" class="fade-in">
-  
-  <% if @all_done %>
-    <h1 style="font-size: 4rem; color: #ff4081;">おめでとう！</h1>
-    <p style="font-size: 1.5rem;">全部 完了したね！</p>
-    
-    <div id="quiz-section" style="background: #1e1e1e; padding: 30px; border-radius: 20px; border: 4px solid #bb86fc; margin: 20px;">
-      <p style="font-size: 1.5rem; font-weight: bold;">【時間 クイズ】</p>
+<%# --- 1. 結果表示画面（正解後） --- %>
+<% if @show_result %>
+  <div style="text-align: center; padding: 50px; background: #121212; min-height: 100vh;" class="fade-in">
+    <h1 style="font-size: 5rem; color: #ffca28;">✨ 正解！！ ✨</h1>
+    <div style="background: #1e1e1e; padding: 40px; border-radius: 30px; border: 5px solid #03dac6; margin: 20px;">
+      <p style="font-size: 2rem; color: #fff;">今日の獲得ポイント</p>
+      <p style="font-size: 4rem; color: #03dac6; font-weight: bold;">+<%= @earned_points %> pt</p>
       
-      <% if @minutes_left > 0 %>
+      <hr style="border-color: #333; margin: 30px 0;">
+      
+      <p style="font-size: 1.5rem; color: #aaa;">出発（7:20）まで あと</p>
+      <p style="font-size: 3.5rem; color: #ff9800; font-weight: bold;"><%= @minutes_left %> 分</p>
+    </div>
+    <%= link_to 'トップに戻る', root_path, style: "display: inline-block; margin-top: 30px; color: #bb86fc; font-size: 1.5rem; text-decoration: none; border: 2px solid #bb86fc; padding: 15px 30px; border-radius: 15px;" %>
+  </div>
+
+<%# --- 2. クイズ中またはタスク中の画面 --- %>
+<% elsif @all_done %>
+  <div id="main-container">
+    <div id="quiz-section" style="background: #1e1e1e; padding: 30px; border-radius: 20px; border: 4px solid #bb86fc; margin: 20px;">
+      <p style="font-size: 1.5rem; font-weight: bold; color: #fff;">【時間 クイズ】</p>
+      
+      <%# 出発時刻 7:20 を過ぎた時に自動でここを隠すためのID %>
+      <div id="active-quiz">
         <p style="font-size: 1.5rem; color: #fff;">
           <span style="color: #4FC3F7;"><%= @start_time_display %></span> から 
           <span style="color: #ffca28;"><%= @end_time_display %></span> までは
@@ -20,87 +29,78 @@
         <p style="font-size: 1.8rem; color: #ff9800; font-weight: bold;">何時間 何分 かな？</p>
 
         <div style="display: flex; justify-content: center; align-items: center; gap: 10px;">
-          <input type="number" id="user-hour" placeholder="0" 
-                style="width: 100px; font-size: 3rem; text-align: center; border-radius: 10px; border: 2px solid #ccc; padding: 10px;">
+          <input type="number" id="user-hour" placeholder="0" style="width: 100px; font-size: 3rem; text-align: center; background: #fff; color: #000; border-radius: 10px;">
           <span style="font-size: 1.5rem; color: #fff;">時間</span>
-          
-          <input type="number" id="user-min" placeholder="00" 
-                style="width: 120px; font-size: 3rem; text-align: center; border-radius: 10px; border: 2px solid #ccc; padding: 10px;">
+          <input type="number" id="user-min" placeholder="00" style="width: 120px; font-size: 3rem; text-align: center; background: #fff; color: #000; border-radius: 10px;">
           <span style="font-size: 1.5rem; color: #fff;">分</span>
         </div>
-
         <br>
-        <button type="button" onclick="checkAnswer()" 
-                style="width: 80%; padding: 20px; font-size: 1.5rem; background-color: #2196F3; color: white; border-radius: 15px; border: none; cursor: pointer;">
-          答え合わせ！
-        </button>
+        <button type="button" onclick="checkAnswer()" style="width: 80%; padding: 20px; font-size: 1.5rem; background-color: #2196F3; color: white; border-radius: 15px; border: none;">答え合わせ！</button>
+      </div>
 
-      <% else %>
+      <%# 7:20を過ぎた時に自動で表示する警告エリア %>
+      <div id="late-warning" style="display: none;">
         <div style="background-color: #fff9c4; padding: 20px; border-radius: 15px; border: 5px solid #fbc02d;">
-          <p style="font-size: 2rem; color: #000; font-weight: bold; margin: 0;">
+          <p style="font-size: 2.2rem; color: #000; font-weight: bold; margin: 0;">
             7:20を 過ぎています！<br>
             急いで 出発 しましょう！
           </p>
         </div>
-      <% end %>
-
-      <div id="result-message" style="margin-top: 20px; font-size: 3rem; font-weight: bold; min-height: 1.2em;"></div>
+        <p style="margin-top: 20px; font-size: 1.5rem; color: #ffca28;">現在の合計: <%= @user_score.score %> pt</p>
+      </div>
     </div>
+  </div>
 
-    <script>
-      window.checkAnswer = function() {
-        const correctTotalMin = <%= @correct_total_minutes %>;
-        const hInput = document.getElementById('user-hour').value || 0;
-        const mInput = document.getElementById('user-min').value || 0;
-        const messageDiv = document.getElementById('result-message');
+  <script>
+    let attemptCount = 0;
 
-        // 入力された値をすべて「分」に換算
-        const userTotalMin = parseInt(hInput) * 60 + parseInt(mInput);
+    // --- リアルタイム時間チェック機能 ---
+    function checkCurrentTime() {
+      const now = new Date();
+      // 日本時間で 7:20 を判定
+      const limit = new Date();
+      limit.setHours(7, 20, 0);
 
-        if (isNaN(userTotalMin)) {
-          messageDiv.innerText = "数字を入力してね";
-          messageDiv.style.color = "#aaa";
-          return;
+      if (now > limit) {
+        document.getElementById('active-quiz').style.display = 'none';
+        document.getElementById('late-warning').style.display = 'block';
+      }
+    }
+    setInterval(checkCurrentTime, 1000); // 1秒ごとにチェック
+
+    window.checkAnswer = function() {
+      attemptCount++;
+      const correctTotalMin = <%= @correct_total_minutes %>;
+      const hInput = document.getElementById('user-hour').value || 0;
+      const mInput = document.getElementById('user-min').value || 0;
+      const userTotalMin = parseInt(hInput) * 60 + parseInt(mInput);
+      
+      if (userTotalMin === correctTotalMin) {
+        let getPoint = 0;
+        // 回答時に7:20を過ぎていないかチェック
+        if (new Date() < new Date().setHours(7, 20, 0)) {
+          if (attemptCount === 1) getPoint = 50;
+          else if (attemptCount === 2) getPoint = 30;
+          else if (attemptCount === 3) getPoint = 10;
         }
 
-        // ズレを計算（±2分までOK）
-        const diff = Math.abs(userTotalMin - correctTotalMin);
-
-        if (diff <= 2) {
-          messageDiv.innerText = "✨ 正解！！ ✨";
-          messageDiv.style.color = "#ffca28";
-        } else {
-          messageDiv.innerText = "残念！ もう一度 考えてみよう";
-          messageDiv.style.color = "#888";
-        }
-      };
-    </script>
-  <% elsif @current_task %>
-    <% if @current_task.sequence == 0 %>
-      <%# --- おはよう画面 --- %>
-      <div style="background-color: #2c2c2c; padding: 40px; border-radius: 30px; border: 5px solid #ffca28; box-shadow: 0 0 20px rgba(255, 202, 40, 0.3);">
-         <p style="font-size: 1.5rem; color: #ffca28; margin-bottom: 10px;">朝ですよ！</p>
-         <h1 style="font-size: 3.5rem; color: #ffffff; text-shadow: 0 0 10px rgba(255,255,255,0.5);"><%= @current_task.name %></h1>
-         <%= button_to complete_task_path(@current_task), method: :post, 
-             style: "width: 90%; padding: 40px; font-size: 3rem; background: #ffca28; color: #000; border-radius: 50px; border: none; box-shadow: 0 8px #c79100; font-weight: bold; cursor: pointer;" do %>
-          ☀️ スタート
-         <% end %>
-      </div>
-
-    <% else %>
-      <%# --- 通常タスク --- %>
-      <p style="color: #aaa; font-size: 1.5rem;">今 すること（<%= @current_task.sequence %>/9）</p>
-      
-      <div style="margin: 20px; padding: 30px; border-radius: 20px; border: 8px solid <%= current_color %>;">
-        <h1 style="font-size: 4.5rem; color: <%= current_color %>; margin: 0;">
-          <%= @current_task.name %>
-        </h1>
-      </div>
-      
-      <%= button_to 'できた！', complete_task_path(@current_task), method: :post, 
-          onclick: "this.style.opacity='0.5'; document.body.style.backgroundColor='#ffffff';", 
-          style: "width: 85%; padding: 45px; font-size: 3.5rem; background-color: #03dac6; color: #000; border-radius: 30px; border: none; font-weight: bold; box-shadow: 0 10px #018786;" %>
-    <% end %>
-  <% end %>
-
-</div>
+        // ポイント加算用の隠しフォームを送信
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '<%= add_points_tasks_path %>';
+        const token = document.querySelector('meta[name="csrf-token"]').content;
+        
+        form.innerHTML = `
+          <input type="hidden" name="authenticity_token" value="${token}">
+          <input type="hidden" name="points" value="${getPoint}">
+        `;
+        document.body.appendChild(form);
+        form.submit();
+      } else {
+        const msg = document.getElementById('result-message');
+        msg.innerText = "残念！ もう一度 考えてみよう";
+        msg.style.color = "#888";
+      }
+    };
+  </script>
+<% end %>

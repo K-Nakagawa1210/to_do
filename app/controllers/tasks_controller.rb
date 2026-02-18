@@ -1,6 +1,27 @@
 class TasksController < ApplicationController
   def index
     jst_now = Time.current.in_time_zone('Tokyo')
+    # --- ポイントの取得 ---
+    @user_score = UserScore.find_or_create_by(id: 1)
+
+    # --- 自動減点チェック（7:20を過ぎて未完了なら-30pt） ---
+    # その日最初のアクセスかつ7:20過ぎで、まだ減点ログがない場合に実行
+    departure_limit = jst_now.change(hour: 7, min: 20, sec: 0)
+    
+    # メインタスク完了判定
+    main_tasks_count = Task.where("sequence > ?", 0).count
+    completed_main_tasks_count = TaskLog.joins(:task)
+                                        .where(completed_at: jst_now.all_day)
+                                        .where("tasks.sequence > ?", 0).count
+    
+    # 7:20過ぎ、かつ全タスク未完了、かつ今日まだ減点されていない
+    if jst_now > departure_limit && completed_main_tasks_count < main_tasks_count
+      unless session[:deducted_today] == jst_now.to_date.to_s
+        @user_score.update(score: @user_score.score - 30)
+        session[:deducted_today] = jst_now.to_date.to_s
+        flash.now[:alert] = "7:20を過ぎたので -30ポイントです..."
+      end
+    end
     completed_task_ids = TaskLog.where(completed_at: jst_now.all_day).pluck(:task_id)
     @current_task = Task.where.not(id: completed_task_ids).order(:sequence).first
 
@@ -31,6 +52,24 @@ class TasksController < ApplicationController
                                         .where(completed_at: jst_now.all_day)
                                         .where("tasks.sequence > ?", 0).count
     @all_done = (@current_task.nil? && completed_main_tasks_count >= main_tasks_count)
+
+    # 正解後に結果を表示するためのフラグ
+    @show_result = params[:result] == 'success'
+    @earned_points = params[:earned_points].to_i
+  end
+
+  def update_score
+    @user_score = UserScore.find(1)
+    if @user_score.update(score: params[:score])
+      redirect_to root_path, notice: "ポイントを更新しました"
+    end
+  end
+
+  def add_points
+    @user_score = UserScore.find(1)
+    earned = params[:points].to_i
+    @user_score.update(score: @user_score.score + earned)
+    redirect_to root_path(result: 'success', earned_points: earned)
   end
 
   def complete

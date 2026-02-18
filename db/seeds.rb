@@ -23,3 +23,7 @@ tasks.each do |task_data|
 end
 
 puts "Success: All data reset and new tasks created!"
+
+UserScore.find_or_create_by!(id: 1) do |s|
+  s.score = 0
+end
