@@ -23,8 +23,8 @@
               <% if log_data %>
                 <span style="color: #03dac6; font-weight: bold;"><%= log_data[:time] %></span><br>
                 <div style="font-size: 0.7rem; margin-top: 5px;">
-                  <%= link_to '改', edit_task_log_path(log_data[:id]), style: "color: #03a9f4; text-decoration: none;" %> | 
-                  <%= link_to '×', delete_log_task_log_path(log_data[:id]), data: { confirm: '消しますか？' }, style: "color: #cf6679; text-decoration: none;" %>
+                  <%= link_to '修正', edit_task_log_path(log_data[:id]), style: "color: #03a9f4; text-decoration: none;" %> | 
+                  <%= link_to '削除', delete_log_task_log_path(log_data[:id]), data: { confirm: '消しますか？' }, style: "color: #cf6679; text-decoration: none;" %>
                 </div>
               <% else %>
                 <span style="color: #444;">-</span>

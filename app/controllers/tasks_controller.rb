@@ -82,8 +82,12 @@ class TasksController < ApplicationController
     respond_to do |format|
       format.html
       format.csv do
-        send_data generate_csv(@dates, @tasks_morning, @tasks_evening, @logs_map), 
-                  filename: "ryoma_record_#{jst_today.strftime('%Y%m')}.csv"
+        # Excel文字化け防止のBOMを追加
+        csv_data = "\xEF\xBB\xBF" + generate_csv(@dates, @tasks_morning, @tasks_evening, @logs_map)
+        
+        send_data csv_data, 
+                  filename: "ryuma_record_#{jst_today.strftime('%Y%m')}.csv",
+                  type: 'text/csv; charset=utf-8'
       end
     end
   end
