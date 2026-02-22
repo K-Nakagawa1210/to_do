@@ -3,7 +3,15 @@
   <div style="font-size: 1.4rem; color: #ffca28; font-weight: bold;">
     ポイント: <%= @user_score.score %> pt
   </div>
-  <%= link_to '選択画面にもどる', root_path(reset_mode: "true"), style: "color: #fff; font-size: 0.9rem; text-decoration: none; border: 2px solid #666; padding: 8px 12px; border-radius: 10px; background: #333;" if @mode.present? %>
+  
+  <%# 確実に update_score アクションを叩くように指定 %>
+  <%= form_with url: update_score_tasks_path, method: :patch, local: true, style: "display: flex; gap: 5px;" do |f| %>
+    <%= f.number_field :score, value: @user_score.score, style: "width: 60px; background: #333; color: white; border: 1px solid #666; border-radius: 5px; text-align: center;" %>
+    <%= f.submit "修正", style: "background: #444; color: #03dac6; border: 1px solid #03dac6; padding: 5px 8px; border-radius: 5px; font-size: 0.7rem;" %>
+  <% end %>
+
+  <%# モード切替ボタン %>
+  <%= link_to '選択画面へ', root_path(reset_mode: "true"), style: "color: #fff; font-size: 0.8rem; text-decoration: none; border: 1px solid #666; padding: 5px; border-radius: 5px;" if @mode.present? %>
 </div>
 
 <div style="text-align: center; font-family: sans-serif; min-height: 100vh; background-color: #121212; color: #e0e0e0; padding-bottom: 50px;">
@@ -11,7 +19,6 @@
   <% if @mode.nil? %>
     <%# --- モード選択画面 --- %>
     <div style="padding-top: 80px;">
-      <h1 style="font-size: 2.8rem; margin-bottom: 50px;">どちらですか？</h1>
       <div style="display: flex; flex-direction: column; gap: 30px; align-items: center;">
         <%= link_to '☀️ 朝の 準備', root_path(mode: 'morning'), style: "width: 80%; padding: 45px; background: #FFB74D; color: black; font-size: 2.5rem; font-weight: bold; text-decoration: none; border-radius: 30px; box-shadow: 0 10px #E65100;" %>
         <%= link_to '🌙 夜の 準備', root_path(mode: 'evening'), style: "width: 80%; padding: 45px; background: #7986CB; color: white; font-size: 2.5rem; font-weight: bold; text-decoration: none; border-radius: 30px; box-shadow: 0 10px #283593;" %>
@@ -35,7 +42,7 @@
           <%= @minutes_left / 60 %>時間 <%= @minutes_left % 60 %>分
         </p>
       </div>
-      <%= link_to '選択画面にもどる', root_path(mode: nil), style: "display: inline-block; margin-top: 30px; color: #bb86fc; font-size: 1.5rem; text-decoration: none; border: 2px solid #bb86fc; padding: 15px 30px; border-radius: 15px;" %>
+      <%= link_to '選択画面にもどる', root_path(reset_mode: "true"), style: "display: inline-block; margin-top: 30px; color: #bb86fc; font-size: 1.5rem; text-decoration: none; border: 2px solid #bb86fc; padding: 15px 30px; border-radius: 15px; font-weight: bold;" %>
     </div>
 
   <% elsif @all_done %>

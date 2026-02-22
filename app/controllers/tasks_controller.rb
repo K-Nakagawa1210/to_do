@@ -6,11 +6,14 @@ class TasksController < ApplicationController
     @user_score = UserScore.find_or_create_by(id: 1)
 
     # モード選択
+    if params[:reset_mode] == "true"
+      session[:mode] = nil
+      # URLからパラメータを消してスッキリさせるためにリダイレクト
+      return redirect_to root_path 
+    end
+
     if params[:mode].present?
       session[:mode] = params[:mode]
-    elsif params[:reset_mode] == "true"
-      # reset_modeが送られてきたらセッションを空にする
-      session[:mode] = nil
     end
     @mode = session[:mode]
 
@@ -64,9 +67,13 @@ class TasksController < ApplicationController
   end
 
   def update_score
-    @user_score = UserScore.find(1)
-    @user_score.update(score: params[:score])
-    redirect_to root_path, notice: "ポイントを更新しました"
+    @user_score = UserScore.find_or_create_by(id: 1)
+    # パラメータ名を確実に取得して更新
+    if @user_score.update(score: params[:score] || params[:user_score][:score])
+      flash[:notice] = "ポイントを更新しました"
+    end
+    # 現在のモードを維持したまま戻る
+    redirect_to root_path
   end
 
   def history
