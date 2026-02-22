@@ -14,7 +14,10 @@ Rails.application.routes.draw do
 
   resources :task_logs, only: [:edit, :update] do
     member do
-      get :delete_log  # GETで削除アクションへ行くルートを追加
+      get :delete_log
+    end
+    collection do
+      delete :delete_by_date
     end
   end
 end
