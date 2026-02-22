@@ -1,0 +1,38 @@
+<div style="overflow-x: auto; border: 1px solid #444; margin-bottom: 20px;">
+  <table style="width: 100%; border-collapse: collapse; min-width: 800px; background: #1e1e1e; font-size: 0.9rem;">
+    <thead>
+      <tr style="background-color: #333;">
+        <th style="border: 1px solid #444; padding: 10px; position: sticky; left: 0; background: #333; z-index: 10;">日にち</th>
+        <% tasks.each do |task| %>
+          <th style="border: 1px solid #444; padding: 10px; min-width: 80px;"><%= task.name %></th>
+        <% end %>
+      </tr>
+    </thead>
+    <tbody>
+      <% dates.each do |date| %>
+        <tr>
+          <td style="border: 1px solid #444; padding: 10px; position: sticky; left: 0; background: #1e1e1e; font-weight: bold; white-space: nowrap;">
+            <%= date.strftime("%m/%d") %>
+            <br>
+            <%# 日付横にその日の一括削除ボタン %>
+            <%= button_to '消去', delete_by_date_task_logs_path(date: date), method: :delete, data: { confirm: "この日の全記録を消しますか？" }, style: "font-size: 0.6rem; color: #cf6679; background: none; border: 1px solid #cf6679; border-radius: 3px; cursor: pointer;" %>
+          </td>
+          <% tasks.each do |task| %>
+            <% log_data = logs_map[[date, task.id]] %>
+            <td style="border: 1px solid #444; padding: 10px; text-align: center; <%= 'background: #004d40;' if log_data %>">
+              <% if log_data %>
+                <span style="color: #03dac6; font-weight: bold;"><%= log_data[:time] %></span><br>
+                <div style="font-size: 0.7rem; margin-top: 5px;">
+                  <%= link_to '改', edit_task_log_path(log_data[:id]), style: "color: #03a9f4; text-decoration: none;" %> | 
+                  <%= link_to '×', delete_log_task_log_path(log_data[:id]), data: { confirm: '消しますか？' }, style: "color: #cf6679; text-decoration: none;" %>
+                </div>
+              <% else %>
+                <span style="color: #444;">-</span>
+              <% end %>
+            </td>
+          <% end %>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>

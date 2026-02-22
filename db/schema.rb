@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_02_18_013745) do
+ActiveRecord::Schema[7.1].define(version: 2026_02_20_073416) do
   create_table "task_logs", charset: "utf8mb3", force: :cascade do |t|
     t.bigint "task_id", null: false
     t.datetime "completed_at"
@@ -24,6 +24,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_02_18_013745) do
     t.integer "sequence"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "category"
   end
 
   create_table "user_scores", charset: "utf8mb3", force: :cascade do |t|

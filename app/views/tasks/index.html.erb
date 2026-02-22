@@ -1,164 +1,82 @@
-<%# --- 1. 共通ヘッダー：ポイント表示と手動修正 --- %>
-<div style="background: #1f1f1f; padding: 15px; border-bottom: 3px solid #bb86fc; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1000; font-family: sans-serif;">
+<%# 共通ヘッダー：ポイント %>
+<div style="background: #1f1f1f; padding: 15px; border-bottom: 3px solid #bb86fc; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1000;">
   <div style="font-size: 1.4rem; color: #ffca28; font-weight: bold;">
-    現在のポイント: <span id="display-score"><%= @user_score.score %></span> pt
+    ポイント: <%= @user_score.score %> pt
   </div>
-  
-  <%= form_with url: update_score_tasks_path, method: :patch, style: "display: flex; gap: 8px;" do |f| %>
-    <%= f.number_field :score, value: @user_score.score, style: "width: 70px; font-size: 1rem; background: #333; color: white; border: 1px solid #666; border-radius: 5px; text-align: center;" %>
-    <%= f.submit "修正", style: "background: #444; color: #03dac6; border: 1px solid #03dac6; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 0.8rem;" %>
-  <% end %>
+  <%= link_to 'モード切替', root_path(mode: nil), style: "color: #fff; font-size: 0.8rem; text-decoration: none; border: 1px solid #666; padding: 5px; border-radius: 5px;" if @mode.present? %>
 </div>
 
 <div style="text-align: center; font-family: sans-serif; min-height: 100vh; background-color: #121212; color: #e0e0e0; padding-bottom: 50px;">
 
-  <%# --- 2. 場面A：クイズ正解後の【結果表示画面】 --- %>
-  <% if @show_result %>
-    <div style="padding-top: 50px;" class="fade-in">
-      <h1 style="font-size: 4.5rem; color: #ffca28; text-shadow: 0 0 20px rgba(255,202,40,0.4); margin-bottom: 20px;">✨ 正解！！ ✨</h1>
-      <div style="background: #1e1e1e; padding: 40px; border-radius: 30px; border: 5px solid #03dac6; margin: 0 20px;">
-        <p style="font-size: 2rem; color: #fff; margin-bottom: 10px;">今日の 獲得ポイント</p>
-        <p style="font-size: 5rem; color: #03dac6; font-weight: bold; margin: 0;">+<%= @earned_points %> pt</p>
-        
-        <hr style="border: 0; border-top: 2px solid #333; margin: 30px 0;">
-        
-        <p style="font-size: 1.5rem; color: #aaa;">出発（7:20）まで あと</p>
-        <p style="font-size: 4rem; color: #ff9800; font-weight: bold; margin: 0;"><%= @minutes_left %> 分</p>
+  <% if @mode.nil? %>
+    <%# --- モード選択画面 --- %>
+    <div style="padding-top: 100px;">
+      <h1 style="font-size: 3rem; margin-bottom: 50px;">どっちを する？</h1>
+      <div style="display: flex; flex-direction: column; gap: 30px; align-items: center;">
+        <%= link_to '☀️ 朝の 準備', root_path(mode: 'morning'), style: "width: 80%; padding: 50px; background: #FFB74D; color: black; font-size: 3rem; font-weight: bold; text-decoration: none; border-radius: 30px; box-shadow: 0 10px #E65100;" %>
+        <%= link_to '🌙 夜の 準備', root_path(mode: 'evening'), style: "width: 80%; padding: 50px; background: #7986CB; color: white; font-size: 3rem; font-weight: bold; text-decoration: none; border-radius: 30px; box-shadow: 0 10px #283593;" %>
       </div>
-      <%= link_to 'トップ画面へ戻る', root_path, style: "display: inline-block; margin-top: 40px; color: #bb86fc; font-size: 1.5rem; text-decoration: none; border: 2px solid #bb86fc; padding: 15px 40px; border-radius: 20px; font-weight: bold;" %>
     </div>
 
-  <%# --- 3. 場面B：全タスク完了後の【クイズ画面】 --- %>
-  <% elsif @all_done %>
-    <div id="quiz-container" style="padding-top: 30px;" class="fade-in">
-      <div id="quiz-section" style="background: #1e1e1e; padding: 30px; border-radius: 20px; border: 4px solid #bb86fc; margin: 0 20px;">
-        <p style="font-size: 1.5rem; font-weight: bold; color: #fff; margin-bottom: 25px;">【時間 クイズ】</p>
-        
-        <div id="active-quiz">
-          <p style="font-size: 1.6rem; color: #fff; line-height: 1.6;">
-            <span style="color: #4FC3F7; font-weight: bold;"><%= @start_time_display %></span> から <br>
-            <span style="color: #ffca28; font-weight: bold;"><%= @end_time_display %></span> までは
-          </p>
-          <p style="font-size: 2.2rem; color: #ff9800; font-weight: bold; margin: 25px 0;">何時間 何分 かな？</p>
-
-          <div style="display: flex; justify-content: center; align-items: center; gap: 15px; margin-bottom: 30px;">
-            <input type="number" id="user-hour" placeholder="0" style="width: 100px; font-size: 3.5rem; text-align: center; background: #fff; color: #000; border-radius: 15px; border: none; padding: 10px;">
-            <span style="font-size: 1.5rem; color: #fff;">時間</span>
-            <input type="number" id="user-min" placeholder="00" style="width: 130px; font-size: 3.5rem; text-align: center; background: #fff; color: #000; border-radius: 15px; border: none; padding: 10px;">
-            <span style="font-size: 1.5rem; color: #fff;">分</span>
-          </div>
-
-          <button type="button" onclick="checkAnswer()" style="width: 90%; padding: 25px; font-size: 2rem; background-color: #2196F3; color: white; border-radius: 20px; border: none; font-weight: bold; box-shadow: 0 8px #1565c0; cursor: pointer;">
-            答え合わせ！
-          </button>
-          <div id="result-message" style="margin-top: 25px; font-size: 1.8rem; font-weight: bold; min-height: 1.2em;"></div>
-        </div>
-
-        <%# 7:20を過ぎた時に自動で表示される警告 %>
-        <div id="late-warning" style="display: none;">
-          <div style="background-color: #fff9c4; padding: 30px; border-radius: 20px; border: 6px solid #fbc02d;">
-            <p style="font-size: 2.5rem; color: #000; font-weight: bold; margin: 0; line-height: 1.4;">
-              7:20を 過ぎています！<br>
-              急いで 出発 しましょう！
-            </p>
-          </div>
-          <p style="margin-top: 30px; font-size: 1.8rem; color: #ffca28; font-weight: bold;">現在の合計: <%= @user_score.score %> pt</p>
-        </div>
+  <% elsif @show_result %>
+    <%# --- 結果画面 --- %>
+    <div style="padding-top: 50px;" class="fade-in">
+      <h1 style="font-size: 4rem; color: #ffca28;">✨ 正解！！ ✨</h1>
+      <div style="background: #1e1e1e; padding: 40px; border-radius: 30px; border: 5px solid #03dac6; margin: 20px;">
+        <% if @mode == "morning" %>
+          <p style="font-size: 2rem; color: #03dac6;">+<%= @earned_points %> pt 獲得！</p>
+          <p style="font-size: 1.5rem; color: #aaa;">出発（<%= @limit_display %>）まで あと</p>
+        <% else %>
+          <p style="font-size: 2rem; color: #fff;"><%= @limit_display %> までに 寝ましょう</p>
+          <p style="font-size: 1.5rem; color: #aaa;">寝るまで あと</p>
+        <% end %>
+        <p style="font-size: 4rem; color: #ff9800; font-weight: bold;"><%= @minutes_left / 60 %>時間 <%= @minutes_left % 60 %>分</p>
       </div>
+      <%= link_to 'トップに戻る', root_path, style: "display: inline-block; margin-top: 30px; color: #bb86fc; font-size: 1.5rem; text-decoration: none; border: 2px solid #bb86fc; padding: 15px 30px; border-radius: 15px;" %>
+    </div>
+
+  <% elsif @all_done %>
+    <%# --- クイズ画面 --- %>
+    <div id="quiz-section" style="padding-top: 30px; margin: 0 20px; background: #1e1e1e; padding: 30px; border-radius: 20px; border: 4px solid #bb86fc;">
+      <p style="font-size: 1.5rem; color: #fff;"><span style="color: #4FC3F7;"><%= @start_time_display %></span> から <span style="color: #ffca28;"><%= @end_time_display %></span> までは</p>
+      <p style="font-size: 2.2rem; color: #ff9800; font-weight: bold;">何時間 何分 かな？</p>
+      <div style="display: flex; justify-content: center; align-items: center; gap: 10px; margin: 20px 0;">
+        <input type="number" id="user-hour" style="width: 80px; font-size: 3rem; text-align: center; border-radius: 10px;"> 時間
+        <input type="number" id="user-min" style="width: 100px; font-size: 3rem; text-align: center; border-radius: 10px;"> 分
+      </div>
+      <button onclick="checkAnswer()" style="width: 100%; padding: 25px; font-size: 2rem; background: #2196F3; color: white; border-radius: 20px; border: none;">答え合わせ！</button>
+      <div id="result-message" style="margin-top: 20px; font-size: 2rem;"></div>
     </div>
 
     <script>
       let attemptCount = 0;
-
-      // --- 1秒ごとに現在時刻をチェックして、7:20を過ぎたら画面を切り替える ---
-      function checkCurrentTime() {
-        const now = new Date();
-        const limit = new Date();
-        limit.setHours(7, 20, 0);
-
-        if (now > limit) {
-          const activeDiv = document.getElementById('active-quiz');
-          const lateDiv = document.getElementById('late-warning');
-          if (activeDiv && activeDiv.style.display !== 'none') {
-            activeDiv.style.display = 'none';
-            lateDiv.style.display = 'block';
-          }
-        }
-      }
-      setInterval(checkCurrentTime, 1000);
-
       window.checkAnswer = function() {
         attemptCount++;
-        const correctTotalMin = <%= @correct_total_minutes %>;
-        const hInput = document.getElementById('user-hour').value || 0;
-        const mInput = document.getElementById('user-min').value || 0;
-        const userTotalMin = parseInt(hInput) * 60 + parseInt(mInput);
-        
-        // 正解判定（完全一致のみ）
-        if (userTotalMin === correctTotalMin) {
-          let getPoint = 0;
-          const now = new Date();
-          const limit = new Date();
-          limit.setHours(7, 20, 0);
-
-          // 7:20を過ぎていなければポイント加算
-          if (now <= limit) {
-            if (attemptCount === 1) getPoint = 50;
-            else if (attemptCount === 2) getPoint = 30;
-            else if (attemptCount === 3) getPoint = 10;
+        const correct = <%= @correct_total_minutes %>;
+        const user = (parseInt(document.getElementById('user-hour').value) || 0) * 60 + (parseInt(document.getElementById('user-min').value) || 0);
+        if (user === correct) {
+          let pts = 0;
+          if ("<%= @mode %>" === "morning" && <%= @minutes_left %> > 0) {
+             pts = attemptCount === 1 ? 50 : (attemptCount === 2 ? 30 : 10);
           }
-
-          // ポイント送信用の隠しフォーム作成
           const form = document.createElement('form');
-          form.method = 'POST';
-          form.action = '<%= add_points_tasks_path %>';
-          const token = document.querySelector('meta[name="csrf-token"]').content;
-          
-          form.innerHTML = `
-            <input type="hidden" name="authenticity_token" value="${token}">
-            <input type="hidden" name="points" value="${getPoint}">
-          `;
-          document.body.appendChild(form);
-          form.submit();
+          form.method = 'POST'; form.action = '<%= add_points_tasks_path %>';
+          form.innerHTML = `<input type="hidden" name="authenticity_token" value="<%= form_authenticity_token %>"><input type="hidden" name="points" value="${pts}">`;
+          document.body.appendChild(form); form.submit();
         } else {
-          const msg = document.getElementById('result-message');
-          msg.innerText = "残念！ もう一度 考えてみよう";
-          msg.style.color = "#888";
+          document.getElementById('result-message').innerText = "もういちど 考えてみよう！";
         }
       };
     </script>
 
-  <%# --- 4. 場面C：通常の【準備タスク画面】 --- %>
   <% elsif @current_task %>
-    <div style="padding-top: 30px;" class="fade-in">
-      <% if @current_task.sequence == 0 %>
-        <%# --- おはよう画面 --- %>
-        <div style="background-color: #2c2c2c; padding: 40px; border-radius: 30px; border: 5px solid #ffca28; margin: 0 20px; box-shadow: 0 0 20px rgba(255, 202, 40, 0.2);">
-           <p style="font-size: 1.8rem; color: #ffca28; margin-bottom: 15px; font-weight: bold;">朝ですよ！</p>
-           <h1 style="font-size: 3.5rem; color: #ffffff; margin-bottom: 40px;"><%= @current_task.name %></h1>
-           <%= button_to complete_task_path(@current_task), method: :post, 
-               style: "width: 100%; padding: 40px; font-size: 3rem; background: #ffca28; color: #000; border-radius: 50px; border: none; font-weight: bold; box-shadow: 0 10px #c79100; cursor: pointer;" do %>
-            ☀️ スタート
-           <% end %>
-        </div>
-      <% else %>
-        <%# --- 各準備ステップ画面 --- %>
-        <% colors = ["#BB86FC", "#03DAC6", "#FFB74D", "#4FC3F7", "#AED581", "#F06292", "#BA68C8", "#81D4FA", "#C5E1A5"] %>
-        <% current_color = colors[(@current_task.sequence.to_i - 1) % colors.length] %>
-
-        <p style="color: #aaa; font-size: 1.6rem; margin-bottom: 20px;">今 すること（<%= @current_task.sequence %>/8）</p>
-        
-        <div style="margin: 0 20px 40px 20px; padding: 40px 20px; border-radius: 25px; border: 10px solid <%= current_color %>;">
-          <h1 style="font-size: 4rem; color: <%= current_color %>; margin: 0; line-height: 1.3;">
-            <%= @current_task.name %>
-          </h1>
-        </div>
-        
-        <%= button_to 'できた！', complete_task_path(@current_task), method: :post, 
-            onclick: "this.style.opacity='0.5'; document.body.style.backgroundColor='#ffffff';", 
-            style: "width: 85%; padding: 50px; font-size: 4rem; background-color: #03dac6; color: #000; border-radius: 40px; border: none; font-weight: bold; box-shadow: 0 12px #018786; cursor: pointer;" %>
-      <% end %>
+    <%# --- タスク画面 --- %>
+    <div style="padding-top: 40px;">
+      <h1 style="font-size: 3.5rem; color: <%= @mode == 'morning' ? '#FFCA28' : '#7986CB' %>;"><%= @current_task.name %></h1>
+      <div style="margin: 30px 20px; padding: 50px 20px; border: 8px solid <%= @mode == 'morning' ? '#FFB74D' : '#9FA8DA' %>; border-radius: 30px;">
+        <p style="font-size: 4.5rem; margin: 0;"><%= @current_task.name %></p>
+      </div>
+      <%= button_to 'できた！', complete_task_path(@current_task), method: :post, style: "width: 85%; padding: 50px; font-size: 4rem; background: #03DAC6; color: black; border-radius: 40px; border: none; font-weight: bold; box-shadow: 0 10px #018786;" %>
     </div>
   <% end %>
-
 </div>
