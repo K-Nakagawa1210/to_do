@@ -6,7 +6,12 @@ class TasksController < ApplicationController
     @user_score = UserScore.find_or_create_by(id: 1)
 
     # モード選択
-    session[:mode] = params[:mode] if params[:mode].present?
+    if params[:mode].present?
+      session[:mode] = params[:mode]
+    elsif params[:reset_mode] == "true"
+      # reset_modeが送られてきたらセッションを空にする
+      session[:mode] = nil
+    end
     @mode = session[:mode]
 
     if @mode.present?

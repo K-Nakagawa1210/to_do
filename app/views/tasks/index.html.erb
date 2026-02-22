@@ -3,8 +3,7 @@
   <div style="font-size: 1.4rem; color: #ffca28; font-weight: bold;">
     ポイント: <%= @user_score.score %> pt
   </div>
-  <%# モード切替（選択画面に戻る） %>
-  <%= link_to '最初にもどる', root_path(mode: nil), style: "color: #fff; font-size: 0.9rem; text-decoration: none; border: 2px solid #666; padding: 8px 12px; border-radius: 10px; background: #333;" if @mode.present? %>
+  <%= link_to '選択画面にもどる', root_path(reset_mode: "true"), style: "color: #fff; font-size: 0.9rem; text-decoration: none; border: 2px solid #666; padding: 8px 12px; border-radius: 10px; background: #333;" if @mode.present? %>
 </div>
 
 <div style="text-align: center; font-family: sans-serif; min-height: 100vh; background-color: #121212; color: #e0e0e0; padding-bottom: 50px;">
